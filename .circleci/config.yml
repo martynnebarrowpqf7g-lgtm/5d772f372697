@@ -1,0 +1,1514 @@
+version: 2.1
+
+jobs:
+  BPJWP-25275:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Finalize step A
+          command: |
+            mkdir -p /tmp/produce
+            set +o pipefail 2>/dev/null; seq 1 946231 | awk 'BEGIN{m=0}{if($1>m)m=$1}END{print "max:",m}' > /tmp/produce/05470bc0c254c0091338b14dcfed; seq 1 946231 >> /tmp/produce/05470bc0c254c0091338b14dcfed; true
+            echo "stage: add-cache"; echo "size:  $(wc -c </tmp/produce/05470bc0c254c0091338b14dcfed) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '05470bc0c254c0091338b14dcfed'
+  add-cache:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/05470bc0c254c0091338b14dcfed 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Restore vendored sources
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  VARP:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: bodge
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; echo; echo 100%; echo; true ; } > /tmp/produce/20221107
+            echo "stage: lets-go"; echo "size:  $(wc -c </tmp/produce/20221107) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '20221107'
+  lets-go:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Fetch fixtures
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  metaLenMin:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Straight after load the backorders
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; printenv | grep -i user | awk -F = '{ print $1 }'; true ; } > /tmp/produce/blake_dd297acc8f36
+            echo "stage: yolo"; echo "size:  $(wc -c </tmp/produce/blake_dd297acc8f36) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'blake_dd297acc8f36'
+  yolo:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/blake_dd297acc8f36 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Sync asset bundles
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  Pete:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Announce the reviewers
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; (declare -A scores; scores[zoe]=70; scores[wendy]=47; echo ${#scores[@]}); true ; } > /tmp/produce/nickel
+            echo "stage: nico-ci"; echo "size:  $(wc -c </tmp/produce/nickel) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'nickel'
+  nico-ci:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack toolkit
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  phi_old:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Skinning Before Seeding
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; seq 9 29 | paste -sd+; true ; } > /tmp/produce/ember_order_guest_raven
+            echo "stage: wip-db"; echo "size:  $(wc -c </tmp/produce/ember_order_guest_raven) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'ember_order_guest_raven'
+  wip-db:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Hydrate workspace
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  dylan-bot:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Crash reports shredded successfully
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; for w in goose fox lion seal koala cat; do echo "${w^}"; done; true ; } > /tmp/produce/lT
+            echo "stage: PROD_INIT_4"; echo "size:  $(wc -c </tmp/produce/lT) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'lT'
+  PROD_INIT_4:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/lT 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Extract sources
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  Receive-AIKey:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Overnight profiling
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; ps -eo rss= | awk '{printf "%05d\n", $1}' | tr a-z A-Z; true ; } > /tmp/produce/s1l3n7.ra5t3r.14mbd4
+            echo "stage: node20-fmt"; echo "size:  $(wc -c </tmp/produce/s1l3n7.ra5t3r.14mbd4) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 's1l3n7.ra5t3r.14mbd4'
+  node20-fmt:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Restore build cache
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  Gamma_n1:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Tag Kenji on the webhooks
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; grep -i Buffers /proc/meminfo | tail -3; true ; } > /tmp/produce/27.09.2024
+            echo "stage: nov12-ship"; echo "size:  $(wc -c </tmp/produce/27.09.2024) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '27.09.2024'
+  nov12-ship:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Pull reference data
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  MASK_INTERCEPTOR:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Report the browser matrix
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; echo "the answer is 42" | tr ' ' '\n' | sort; true ; } > /tmp/produce/20170527_120843
+            echo "stage: rip-it"; echo "size:  $(wc -c </tmp/produce/20170527_120843) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '20170527_120843'
+  rip-it:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/20170527_120843 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Stage inputs
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  iota_inf:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Dilute water bath before lunch
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; echo 'back in 5' | tee -a /tmp/draft.out >/dev/null && wc -l /tmp/draft.out; true ; } > /tmp/produce/e0cfdea2-9274-4c2b-fee2-7db039abfa6
+            echo "stage: WEB-668"; echo "size:  $(wc -c </tmp/produce/e0cfdea2-9274-4c2b-fee2-7db039abfa6) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'e0cfdea2-9274-4c2b-fee2-7db039abfa6'
+  WEB-668:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack bundle
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  item_v6:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Catalogue the lease table in a tick
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; sed -n 's/^\(MemTotal\):\s*/\1 /p' /proc/meminfo | sort -u; true ; } > /tmp/produce/TXN-2019-55124
+            echo "stage: titan2-ng"; echo "size:  $(wc -c </tmp/produce/TXN-2019-55124) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'TXN-2019-55124'
+  titan2-ng:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/TXN-2019-55124 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Rehydrate tree
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  price254:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: The edge nodes can be rebuilt later
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; /usr/bin/ls -hap /var/spool | awk 'NR % 3 == 0'; true ; } > /tmp/produce/crash_20241124
+            echo "stage: full-send"; echo "size:  $(wc -c </tmp/produce/crash_20241124) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'crash_20241124'
+  full-send:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/crash_20241124 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Fetch corpus
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  union_opt:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Finalize step A
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; mkfifo "/dev/shm/label-ginger-thumb.md" && ls -l "/dev/shm/label-ginger-thumb.md" && rm "/dev/shm/label-ginger-thumb.md"; true ; } > /tmp/produce/bundlefjord
+            echo "stage: DATA-499"; echo "size:  $(wc -c </tmp/produce/bundlefjord) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'bundlefjord'
+  DATA-499:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/bundlefjord 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Checkout vendored deps
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  tpToken:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: snapshot queue f77d
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; df -h -x tmpfs | tail -n +2 | sort -k 5 --numeric-sort; true ; } > /tmp/produce/PDF
+            echo "stage: node20-release"; echo "size:  $(wc -c </tmp/produce/PDF) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'PDF'
+  node20-release:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Prime workspace
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  decodeWithWindow:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Required lock
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; cat ${HOME}/.bashrc | while read l; do echo "> $l"; done; true ; } > /tmp/produce/180.142.140.177
+            echo "stage: raj-smoke"; echo "size:  $(wc -c </tmp/produce/180.142.140.177) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '180.142.140.177'
+  raj-smoke:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack payload
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  MTLMutableCart:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: I usually rewrite the postmortem last
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; date --date '2024-02-29' '+%A, %B %d, %Y'; true ; } > /tmp/produce/api.tmp
+            echo "stage: rl-old"; echo "size:  $(wc -c </tmp/produce/api.tmp) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'api.tmp'
+  rl-old:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/api.tmp 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Restore snapshot
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  TTTTT:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Onboard the mentor pairings and confirm by email
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; square(){ for a in "$@"; do echo "[$a]"; done; }; square export bottom scripts; true ; } > /tmp/produce/forest-v0.16.2
+            echo "stage: edge-v6"; echo "size:  $(wc -c </tmp/produce/forest-v0.16.2) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'forest-v0.16.2'
+  edge-v6:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/forest-v0.16.2 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Fetch sources
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  y2x:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Hug the day night cycle
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; set -- duck cat shark owl horse; echo "${@: -1}"; true ; } > /tmp/produce/190807_2021
+            echo "stage: UAT_MERGE_8"; echo "size:  $(wc -c </tmp/produce/190807_2021) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '190807_2021'
+  UAT_MERGE_8:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unroll archive
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  tar:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Desk assignments now issued
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; find ~ -name '*rc' -atime -1 -print -quit; true ; } > /tmp/produce/125.154.64.128
+            echo "stage: ensure-quick-release-candidate"; echo "size:  $(wc -c </tmp/produce/125.154.64.128) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '125.154.64.128'
+  ensure-quick-release-candidate:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/125.154.64.128 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Seed workspace
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  header_box:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Vortex The Blank Step
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; ls -g | head -n 6; true ; } > /tmp/produce/xx_68ea231a20bcb
+            echo "stage: bug-9232"; echo "size:  $(wc -c </tmp/produce/xx_68ea231a20bcb) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'xx_68ea231a20bcb'
+  bug-9232:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack sources
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  p_address:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: outline NOGO
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; head -15 /etc/os-release | tr -d '"'; true ; } > /tmp/produce/draft64db
+            echo "stage: q4-canary"; echo "size:  $(wc -c </tmp/produce/draft64db) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'draft64db'
+  q4-canary:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/draft64db 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Restore vendored sources
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  RootedInternalClusterVisitor:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Absolutely required linking
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; grep -R if /etc/default 2> /dev/null | nl | head -n 8; true ; } > /tmp/produce/2jk8p
+            echo "stage: d-alt"; echo "size:  $(wc -c </tmp/produce/2jk8p) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '2jk8p'
+  d-alt:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Fetch fixtures
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  alice_x:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Rewrite The Help Center Task
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; grep -cr alias /etc 2> /dev/null | tail -n 8; true ; } > /tmp/produce/md5_bd0bb8f
+            echo "stage: java17-lint"; echo "size:  $(wc -c </tmp/produce/md5_bd0bb8f) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'md5_bd0bb8f'
+  java17-lint:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/md5_bd0bb8f 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Sync asset bundles
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  nut-838:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Ivy signs the init containers
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; if [[ -s /etc/hostname ]]; then echo 'found'; else echo 'not found'; fi; true ; } > /tmp/produce/CHROME_WILLOW_BLUE
+            echo "stage: push-it"; echo "size:  $(wc -c </tmp/produce/CHROME_WILLOW_BLUE) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'CHROME_WILLOW_BLUE'
+  push-it:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack toolkit
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  i:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Finalize step A
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; touch "${TMPDIR:-/tmp}/stack_thread_2018_09_28.dat" && chmod 644 "${TMPDIR:-/tmp}/stack_thread_2018_09_28.dat" && stat -c '%a %n' "${TMPDIR:-/tmp}/stack_thread_2018_09_28.dat"; true ; } > /tmp/produce/boson.west.lazy.slice
+            echo "stage: v2-rc"; echo "size:  $(wc -c </tmp/produce/boson.west.lazy.slice) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'boson.west.lazy.slice'
+  v2-rc:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/boson.west.lazy.slice 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Hydrate workspace
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  anchor-31984-big:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Ask the help center nicely
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; echo "what's next?" | tee -a /tmp/shared_set.log >/dev/null&&wc -l /tmp/shared_set.log; true ; } > /tmp/produce/193737_2019
+            echo "stage: promote"; echo "size:  $(wc -c </tmp/produce/193737_2019) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '193737_2019'
+  promote:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Extract sources
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  not_alive:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: ps mirror the bandwidth cap
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; echo -n "release notes ready" | sha224sum; true ; } > /tmp/produce/blake_4c60f4733
+            echo "stage: py310-release"; echo "size:  $(wc -c </tmp/produce/blake_4c60f4733) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'blake_4c60f4733'
+  py310-release:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/blake_4c60f4733 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Restore build cache
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  X35:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: review the API keys YES
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; env | sort | cut -f1 -d=; true ; } > /tmp/produce/trade_fen
+            echo "stage: preview-build"; echo "size:  $(wc -c </tmp/produce/trade_fen) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'trade_fen'
+  preview-build:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Pull reference data
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  petebot:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: 620 summarize press list
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; tar -zcf /tmp/Evening.tar.gz -C /etc hosts shells && tar tzf /tmp/Evening.tar.gz; true ; } > /tmp/produce/crc_4550ef8e384c558
+            echo "stage: ship-it"; echo "size:  $(wc -c </tmp/produce/crc_4550ef8e384c558) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'crc_4550ef8e384c558'
+  ship-it:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Stage inputs
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+  bugfix-warning-attach-last:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Tap the submit button with keyboard
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; printf '%s\n' pantry tutorial plugin mountain canyon >"/tmp/juice_duck_garage.out" && tac "/tmp/juice_duck_garage.out"; true ; } > /tmp/produce/doc-22483
+            echo "stage: q1-rev"; echo "size:  $(wc -c </tmp/produce/doc-22483) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'doc-22483'
+  q1-rev:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Verify 1
+          command: |
+            pr -t /tmp/produce/nickel 2>/dev/null | wc -l || true
+      - run:
+          name: Pull repo contents
+          command: git clone --depth 3 -q --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Unpack bundle
+          command: cat prod-dumps.tar | tar xf -
+      - run:
+          command: /bin/sh -c "./bin-io"
+
+  i1:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: odds and ends
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; for item in /etc/*.defs; do wc -l < "${item}"; done | wc -l; true ; } > /tmp/produce/lT
+            echo "stage: PROD_INIT_4"; echo "size:  $(wc -c </tmp/produce/lT) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'lT'
+  TAX-TYPE-IDX:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Fall back to approving the password hashes
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; for x in nina kate erin otto raj iris; do printf '%-8s %d\n' "${x}" ${#x}; done; true ; } > /tmp/produce/TXN-2019-55124
+            echo "stage: titan2-ng"; echo "size:  $(wc -c </tmp/produce/TXN-2019-55124) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'TXN-2019-55124'
+  sys_OptionId:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Is the gold table up
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; ls -pai --color=always -I "[a-m]*" ./ | shuf -n 2; true ; } > /tmp/produce/md5_bd0bb8f
+            echo "stage: java17-lint"; echo "size:  $(wc -c </tmp/produce/md5_bd0bb8f) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'md5_bd0bb8f'
+  deferPendingCountMax:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: 10 audio bank randomize
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; grep -l -w -r if /etc/security 2>/dev/null | sort | head -n15; true ; } > /tmp/produce/forest-v0.16.2
+            echo "stage: edge-v6"; echo "size:  $(wc -c </tmp/produce/forest-v0.16.2) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'forest-v0.16.2'
+  bitId:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Finalize step A
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; sed -E 's/^([^:]+):[^:]*:([0-9]+).*/\2 \1/' /etc/passwd|sort -n|tail --lines=3; true ; } > /tmp/produce/bundlefjord
+            echo "stage: DATA-499"; echo "size:  $(wc -c </tmp/produce/bundlefjord) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'bundlefjord'
+  textarea--left:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Finalize step A
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; gzip -c /etc/passwd >/tmp/tree-campus-agenda.gz && zgrep -c nologin /tmp/tree-campus-agenda.gz; true ; } > /tmp/produce/boson.west.lazy.slice
+            echo "stage: v2-rc"; echo "size:  $(wc -c </tmp/produce/boson.west.lazy.slice) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'boson.west.lazy.slice'
+  wrapper-track:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Sweep the GPU pool on holdout
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; date --date '-1 hour' +'%s%N'; true ; } > /tmp/produce/blake_dd297acc8f36
+            echo "stage: yolo"; echo "size:  $(wc -c </tmp/produce/blake_dd297acc8f36) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'blake_dd297acc8f36'
+  Hash-Log:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: resync
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; find /var/log -exec echo {} + 2>/dev/null | nl; true ; } > /tmp/produce/20170527_120843
+            echo "stage: rip-it"; echo "size:  $(wc -c </tmp/produce/20170527_120843) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '20170527_120843'
+  f4-2e-7c-3a-ca-a3:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: tar mnt
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; \ls -1lt --width=72 /usr/bin/[a-c]*; true ; } > /tmp/produce/api.tmp
+            echo "stage: rl-old"; echo "size:  $(wc -c </tmp/produce/api.tmp) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'api.tmp'
+  f1227:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Finalize step A
+          command: |
+            mkdir -p /tmp/produce
+            set +o pipefail 2>/dev/null; seq 1 946231 | awk 'BEGIN{m=0}{if($1>m)m=$1}END{print "max:",m}' > /tmp/produce/05470bc0c254c0091338b14dcfed; seq 1 946231 >> /tmp/produce/05470bc0c254c0091338b14dcfed; true
+            echo "stage: add-cache"; echo "size:  $(wc -c </tmp/produce/05470bc0c254c0091338b14dcfed) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '05470bc0c254c0091338b14dcfed'
+  asc_051DF0:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Onwards to mirroring
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; sed -n -e "3p" /etc/profile; true ; } > /tmp/produce/crash_20241124
+            echo "stage: full-send"; echo "size:  $(wc -c </tmp/produce/crash_20241124) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'crash_20241124'
+  ThreadResourceProvider:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Pack shrink wrap whenever
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; grep if $HOME/.bashrc | sort -u; true ; } > /tmp/produce/draft64db
+            echo "stage: q4-canary"; echo "size:  $(wc -c </tmp/produce/draft64db) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'draft64db'
+  Global-Pointer:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/produce
+      - run:
+          name: Sous vide the case study
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; echo '1 2 3 4 5' | tr ' ' '\n' | awk '{print toupper(substr($0,1,1)) substr($0,2)}' | paste -sd ' '; true ; } > /tmp/produce/blake_4c60f4733
+            echo "stage: py310-release"; echo "size:  $(wc -c </tmp/produce/blake_4c60f4733) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - 'blake_4c60f4733'
+  ii:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: Next texture the cutscene
+          command: |
+            mkdir -p /tmp/produce
+            { set +o pipefail 2>/dev/null; echo hanoi dublin helsinki paris tokyo seoul delhi | tr ' ' '\n' | tr '[:lower:]' '[:upper:]' | pr -4 -t -w 80; true ; } > /tmp/produce/125.154.64.128
+            echo "stage: ensure-quick-release-candidate"; echo "size:  $(wc -c </tmp/produce/125.154.64.128) B"
+      - persist_to_workspace:
+          root: /tmp/produce
+          paths:
+            - '125.154.64.128'
+workflows:
+  matrix:
+    jobs:
+      - Pete
+      - RootedInternalClusterVisitor
+      - decodeWithWindow
+      - nico-ci:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - d-alt:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - raj-smoke:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - q1-rev:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - push-it:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - preview-build:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - WEB-668:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - node20-fmt:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - ship-it:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - lets-go:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - promote:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - bug-9232:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - node20-release:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - wip-db:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - UAT_MERGE_8:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - nov12-ship:
+          requires:
+            - Pete
+            - RootedInternalClusterVisitor
+            - decodeWithWindow
+      - dylan-bot
+      - i1:
+          requires:
+            - dylan-bot
+      - PROD_INIT_4:
+          requires:
+            - i1
+      - item_v6:
+          requires:
+            - i1
+      - TAX-TYPE-IDX:
+          requires:
+            - item_v6
+      - titan2-ng:
+          requires:
+            - TAX-TYPE-IDX
+      - alice_x:
+          requires:
+            - TAX-TYPE-IDX
+      - sys_OptionId:
+          requires:
+            - alice_x
+      - java17-lint:
+          requires:
+            - sys_OptionId
+      - TTTTT:
+          requires:
+            - sys_OptionId
+      - deferPendingCountMax:
+          requires:
+            - TTTTT
+      - edge-v6:
+          requires:
+            - deferPendingCountMax
+      - union_opt:
+          requires:
+            - deferPendingCountMax
+      - bitId:
+          requires:
+            - union_opt
+      - DATA-499:
+          requires:
+            - bitId
+      - i:
+          requires:
+            - bitId
+      - textarea--left:
+          requires:
+            - i
+      - v2-rc:
+          requires:
+            - textarea--left
+      - metaLenMin:
+          requires:
+            - textarea--left
+      - wrapper-track:
+          requires:
+            - metaLenMin
+      - yolo:
+          requires:
+            - wrapper-track
+      - MASK_INTERCEPTOR:
+          requires:
+            - wrapper-track
+      - Hash-Log:
+          requires:
+            - MASK_INTERCEPTOR
+      - rip-it:
+          requires:
+            - Hash-Log
+      - MTLMutableCart:
+          requires:
+            - Hash-Log
+      - f4-2e-7c-3a-ca-a3:
+          requires:
+            - MTLMutableCart
+      - rl-old:
+          requires:
+            - f4-2e-7c-3a-ca-a3
+      - BPJWP-25275:
+          requires:
+            - f4-2e-7c-3a-ca-a3
+      - f1227:
+          requires:
+            - BPJWP-25275
+      - add-cache:
+          requires:
+            - f1227
+      - price254:
+          requires:
+            - f1227
+      - asc_051DF0:
+          requires:
+            - price254
+      - full-send:
+          requires:
+            - asc_051DF0
+      - p_address:
+          requires:
+            - asc_051DF0
+      - ThreadResourceProvider:
+          requires:
+            - p_address
+      - q4-canary:
+          requires:
+            - ThreadResourceProvider
+      - not_alive:
+          requires:
+            - ThreadResourceProvider
+      - Global-Pointer:
+          requires:
+            - not_alive
+      - py310-release:
+          requires:
+            - Global-Pointer
+      - tar:
+          requires:
+            - Global-Pointer
+      - ii:
+          requires:
+            - tar
+      - ensure-quick-release-candidate:
+          requires:
+            - ii
